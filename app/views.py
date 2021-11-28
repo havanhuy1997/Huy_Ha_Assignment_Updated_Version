@@ -6,7 +6,6 @@ import rest_framework.permissions as rest_permissions
 import rest_framework.authtoken.views as authtoken_views
 import rest_framework.authtoken.models as authtoken_models
 import rest_framework.views as rest_views
-import rest_framework.decorators as rest_decorators
 from rest_framework.response import Response
 from rest_framework import generics
 from rest_framework import status
@@ -136,58 +135,90 @@ class CountryListView(generics.ListAPIView):
     permission_classes = (rest_permissions.IsAuthenticated,)
 
 
-@rest_decorators.api_view(["GET"])
-@rest_decorators.permission_classes((rest_permissions.IsAuthenticated,))
-def get_sale_statistics(request):
-    total_number_current, total_revenue_current = 0, 0
-    total_number_all, total_revenue_all = 0, 0
-    highest_revenue_sale_current = None
-    highest_revenue_current = float("-inf")
-    product_data = collections.defaultdict(dict)
-    for sale in models.Sale.objects.all():
-        if sale.user.id == request.user.id:
-            # Calculate average_sales_for_current_user
-            total_number_current += sale.sales_number
-            total_revenue_current += sale.revenue
+class SaleStatisticsView(rest_views.APIView):
+    permission_classes = (rest_permissions.IsAuthenticated,)
 
-            # Calcualte highest_revenue_sale_for_current_user
-            if sale.revenue > highest_revenue_current:
-                highest_revenue_current = sale.revenue
-                highest_revenue_sale_current = sale
-
-            # Calculate data for each product
-            product = product_data[sale.product]
-            product["revenue"] = product.get("revenue", 0) + sale.revenue
-            product["number_sold"] = product.get("number_sold", 0) + sale.sales_number
-        else:
-            total_number_all += sale.sales_number
-            total_revenue_all += sale.revenue
-
-    highest_revenue, highest_number = float("-inf"), float("-inf")
-    revenue_product, number_product = None, None
-    for product_name, data in product_data.items():
-        if data["revenue"] > highest_revenue:
-            highest_revenue = data["revenue"]
-            revenue_product = product_name
-        if data["number_sold"] > highest_number:
-            highest_number = data["number_sold"]
-            number_product = product_name
-
-    return Response(
-        {
-            "average_sales_for_current_user": total_revenue_current
-            / total_number_current,
-            "average_sale_all_user": total_revenue_all / total_number_all,
-            "highest_revenue_sale_for_current_user": {
-                "sale_id": highest_revenue_sale_current.id,
-                "revenue": highest_revenue_sale_current.revenue,
-            },
-            "product_highest_revenue_for_current_user": {
-                "product_name": revenue_product
-            },
-            "product_highest_sales_number_for_current_user": {
-                "product_name": number_product
-            },
+    @swagger_auto_schema(
+        tags=["Statistics"],
+        operation_description="Retrieve all the statistics",
+        responses={
+            status.HTTP_200_OK: openapi.Response(
+                "",
+                openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "average_sales_for_current_user": openapi.Schema(
+                            type=openapi.TYPE_NUMBER
+                        ),
+                        "average_sale_all_user": openapi.Schema(
+                            type=openapi.TYPE_NUMBER
+                        ),
+                        "highest_revenue_sale_for_current_user": openapi.Schema(
+                            type=openapi.TYPE_NUMBER
+                        ),
+                        "product_highest_revenue_for_current_user": openapi.Schema(
+                            type=openapi.TYPE_OBJECT
+                        ),
+                        "product_highest_sales_number_for_current_user": openapi.Schema(
+                            type=openapi.TYPE_OBJECT
+                        ),
+                    },
+                ),
+            )
         },
-        status=status.HTTP_200_OK,
     )
+    def get(self, request):
+        total_number_current, total_revenue_current = 0, 0
+        total_number_all, total_revenue_all = 0, 0
+        highest_revenue_sale_current = None
+        highest_revenue_current = float("-inf")
+        product_data = collections.defaultdict(dict)
+        for sale in models.Sale.objects.all():
+            if sale.user.id == request.user.id:
+                # Calculate average_sales_for_current_user
+                total_number_current += sale.sales_number
+                total_revenue_current += sale.revenue
+
+                # Calcualte highest_revenue_sale_for_current_user
+                if sale.revenue > highest_revenue_current:
+                    highest_revenue_current = sale.revenue
+                    highest_revenue_sale_current = sale
+
+                # Calculate data for each product
+                product = product_data[sale.product]
+                product["revenue"] = product.get("revenue", 0) + sale.revenue
+                product["number_sold"] = (
+                    product.get("number_sold", 0) + sale.sales_number
+                )
+            else:
+                total_number_all += sale.sales_number
+                total_revenue_all += sale.revenue
+
+        highest_revenue, highest_number = float("-inf"), float("-inf")
+        revenue_product, number_product = None, None
+        for product_name, data in product_data.items():
+            if data["revenue"] > highest_revenue:
+                highest_revenue = data["revenue"]
+                revenue_product = product_name
+            if data["number_sold"] > highest_number:
+                highest_number = data["number_sold"]
+                number_product = product_name
+
+        return Response(
+            {
+                "average_sales_for_current_user": total_revenue_current
+                / total_number_current,
+                "average_sale_all_user": total_revenue_all / total_number_all,
+                "highest_revenue_sale_for_current_user": {
+                    "sale_id": highest_revenue_sale_current.id,
+                    "revenue": highest_revenue_sale_current.revenue,
+                },
+                "product_highest_revenue_for_current_user": {
+                    "product_name": revenue_product
+                },
+                "product_highest_sales_number_for_current_user": {
+                    "product_name": number_product
+                },
+            },
+            status=status.HTTP_200_OK,
+        )

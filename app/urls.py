@@ -11,7 +11,9 @@ api_url_patterns = [
     path("sales/", views.SaleListView.as_view()),
     path("sales/<int:pk>/", views.SaleDetailView.as_view()),
     path("countries/", views.CountryListView.as_view(), name="countries"),
-    path("sale_statistics/", views.get_sale_statistics, name="sale_statistics"),
+    path(
+        "sale_statistics/", views.SaleStatisticsView.as_view(), name="sale_statistics"
+    ),
 ]
 
 schema_view = get_schema_view(
