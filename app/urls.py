@@ -6,8 +6,9 @@ import rest_framework.permissions as rest_permissions
 from . import views
 
 api_url_patterns = [
-    path("login", views.LoginView.as_view(), name="login"),
-    path("logout", views.LogoutView.as_view(), name="logout"),
+    path("login/", views.LoginView.as_view(), name="login"),
+    path("logout/", views.LogoutView.as_view(), name="logout"),
+    path("user/<int:pk>/", views.UserView.as_view(), name="user"),
 ]
 
 schema_view = get_schema_view(
