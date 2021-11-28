@@ -1,1 +1,1 @@
-web: gunicorn huy.wsgi --log-file -
+web: gunicorn huy.wsgi
