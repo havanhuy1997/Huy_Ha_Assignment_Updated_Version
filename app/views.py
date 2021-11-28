@@ -82,38 +82,46 @@ class LogoutView(rest_views.APIView):
         return Response({"message": "Logout successfully", "success": True})
 
 
-class UserListView(generics.RetrieveAPIView):
-    queryset = models.User.objects.all()
-    serializer_class = serializers.UserSerializer
-
-
-class UserDetailView(generics.UpdateAPIView):
-    queryset = models.User.objects.all()
-    serializer_class = serializers.UserSerializer
-
-
 class UserView(rest_views.APIView):
     """
     Retrieve, update a user instance.
     """
 
+    permission_classes = (rest_permissions.IsAuthenticated,)
+
     def get_object(self, pk):
-        try:
-            return models.User.objects.get(pk=pk)
-        except models.User.DoesNotExist:
-            raise django_htt.Http404
+        if self.request.user.id == pk:
+            try:
+                return models.User.objects.get(pk=pk)
+            except models.User.DoesNotExist:
+                raise django_htt.Http404
+        return None
 
     def get(self, request, pk):
         user = self.get_object(pk)
-        print('user', user)
+        if not user:
+            return Response({"message": "not allowd"}, status=status.HTTP_403_FORBIDDEN)
         serializer = serializers.UserSerializer(user)
-        print('user', serializer.data)
         return Response(serializer.data)
 
     def put(self, request, pk):
         user = self.get_object(pk)
+        if not user:
+            return Response({"message": "not allowd"}, status=status.HTTP_403_FORBIDDEN)
         serializer = serializers.UserSerializer(user, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SaleListView(generics.ListCreateAPIView):
+    queryset = models.Sale.objects.all()
+    serializer_class = serializers.SaleSerializer
+    permission_classes = (rest_permissions.IsAuthenticated,)
+
+
+class SaleDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = models.Sale.objects.all()
+    serializer_class = serializers.SaleSerializer
+    permission_classes = (rest_permissions.IsAuthenticated,)

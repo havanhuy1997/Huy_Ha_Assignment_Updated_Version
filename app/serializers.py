@@ -17,3 +17,23 @@ class UserSerializer(serializers.ModelSerializer):
             "gender",
             "age",
         ]
+
+
+class SaleSerializer(serializers.ModelSerializer):
+    product = serializers.CharField(required=False)
+
+    class Meta:
+        model = models.Sale
+        fields = [
+            "id",
+            "product",
+            "revenue",
+            "sales_number",
+            "date",
+            "user_id",
+        ]
+
+    def create(self, validated_data):
+        return models.Sale.objects.create(
+            **validated_data, user=self.context["request"].user
+        )

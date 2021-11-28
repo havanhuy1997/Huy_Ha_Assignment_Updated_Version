@@ -1,7 +1,6 @@
-from django.urls import path, include
+from django.urls import path
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-import rest_framework.permissions as rest_permissions
 
 from . import views
 
@@ -9,6 +8,8 @@ api_url_patterns = [
     path("login/", views.LoginView.as_view(), name="login"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
     path("user/<int:pk>/", views.UserView.as_view(), name="user"),
+    path("sales/", views.SaleListView.as_view()),
+    path("sales/<int:pk>/", views.SaleDetailView.as_view()),
 ]
 
 schema_view = get_schema_view(
