@@ -37,3 +37,24 @@ class SaleSerializer(serializers.ModelSerializer):
         return models.Sale.objects.create(
             **validated_data, user=self.context["request"].user
         )
+
+
+class CitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.City
+        fields = [
+            "id",
+            "name",
+        ]
+
+
+class CountrySerializer(serializers.ModelSerializer):
+    cities = CitySerializer(many=True)
+
+    class Meta:
+        model = models.Country
+        fields = [
+            "id",
+            "name",
+            "cities",
+        ]

@@ -8,7 +8,9 @@ class Country(models.Model):
 
 class City(models.Model):
     name = models.TextField()
-    country = models.ForeignKey(Country, on_delete=models.CASCADE)
+    country = models.ForeignKey(
+        Country, related_name="cities", on_delete=models.CASCADE
+    )
 
 
 class User(auth_models.AbstractUser):

@@ -104,7 +104,7 @@ class UserView(rest_views.APIView):
         serializer = serializers.UserSerializer(user)
         return Response(serializer.data)
 
-    def put(self, request, pk):
+    def patch(self, request, pk):
         user = self.get_object(pk)
         if not user:
             return Response({"message": "not allowd"}, status=status.HTTP_403_FORBIDDEN)
@@ -124,4 +124,10 @@ class SaleListView(generics.ListCreateAPIView):
 class SaleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Sale.objects.all()
     serializer_class = serializers.SaleSerializer
+    permission_classes = (rest_permissions.IsAuthenticated,)
+
+
+class CountryListView(generics.ListAPIView):
+    queryset = models.Country.objects.all()
+    serializer_class = serializers.CountrySerializer
     permission_classes = (rest_permissions.IsAuthenticated,)
