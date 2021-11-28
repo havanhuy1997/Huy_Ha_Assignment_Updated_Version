@@ -134,3 +134,5 @@ STATIC_URL = "/static/"
 AUTH_USER_MODEL = "app.User"
 
 APPEND_SLASH = True
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
