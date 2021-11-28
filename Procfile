@@ -1,0 +1,1 @@
+web: gunicorn huy.wsgi --log-file -
