@@ -2,3 +2,4 @@
 /huy/__pycache__/
 /.vscode/
 *.cpython-38.pyc
+/staticfiles/
