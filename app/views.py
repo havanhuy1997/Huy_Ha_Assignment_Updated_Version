@@ -1,7 +1,6 @@
 import collections
 
 from django.views.decorators.csrf import csrf_exempt
-import django.core.exceptions as django_exception
 import django.http as django_htt
 import rest_framework.permissions as rest_permissions
 import rest_framework.authtoken.views as authtoken_views
@@ -197,9 +196,8 @@ class SaleStatisticsView(rest_views.APIView):
                 product["number_sold"] = (
                     product.get("number_sold", 0) + sale.sales_number
                 )
-            else:
-                total_number_all += sale.sales_number
-                total_revenue_all += sale.revenue
+            total_number_all += sale.sales_number
+            total_revenue_all += sale.revenue
 
         highest_revenue, highest_number = float("-inf"), float("-inf")
         revenue_product, number_product = None, None
