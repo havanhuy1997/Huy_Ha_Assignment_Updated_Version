@@ -49,6 +49,8 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "gender",
             "age",
+            "country",
+            "city",
         ]
 
 

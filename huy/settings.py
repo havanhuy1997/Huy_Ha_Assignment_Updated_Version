@@ -28,6 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     "huy-ha-20211128-trial.herokuapp.com",
     "huy-ha-20211129-updated.herokuapp.com",
+    "localhost",
 ]
 
 
