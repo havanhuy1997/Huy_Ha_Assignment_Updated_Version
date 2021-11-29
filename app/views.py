@@ -1,6 +1,7 @@
 import collections
 
 from django.views.decorators.csrf import csrf_exempt
+import django.core.exceptions as django_exception
 import django.http as django_htt
 import rest_framework.permissions as rest_permissions
 import rest_framework.authtoken.views as authtoken_views
@@ -14,6 +15,7 @@ from drf_yasg import openapi
 
 import app.models as models
 import app.serializers as serializers
+import app.permissions as permissions
 
 
 class LoginView(authtoken_views.ObtainAuthToken):
@@ -118,15 +120,20 @@ class UserView(rest_views.APIView):
 
 
 class SaleListView(generics.ListCreateAPIView):
-    queryset = models.Sale.objects.all()
     serializer_class = serializers.SaleSerializer
     permission_classes = (rest_permissions.IsAuthenticated,)
+
+    def get_queryset(self):
+        return models.Sale.objects.filter(user=self.request.user)
 
 
 class SaleDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = models.Sale.objects.all()
     serializer_class = serializers.SaleSerializer
-    permission_classes = (rest_permissions.IsAuthenticated,)
+    permission_classes = (
+        rest_permissions.IsAuthenticated,
+        permissions.isObjectBelongToUser,
+    )
 
 
 class CountryListView(generics.ListAPIView):
